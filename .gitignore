@@ -1,0 +1,9 @@
+*~
+bin/*
+obj/*
+include/Box2D/*
+libsfml*
+nodachi2D.depend
+nodachi2D.layout
+recreate_links.sh
+

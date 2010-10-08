@@ -1,0 +1,11 @@
+objectId; visualAppearanceId; BODY_DEFINITION( ... ); FIXTURE_DEFINITION( ... );
+
+BODY_DEFINITION( type[static | dynamic | kinematic]; position_x; position_y; angle; linearvelocity_x; linearvelocity_y; angularVelocity; linearDamping; angularDamping; allowSleep[allowSleep | denySleep]; awake[awake | asleep]; denyRotation[denyRotation | allowRotation]; isBullet[isBullet | isNoBullet]; active[active | inactive] )
+
+FIXTURE_DEFINITION( friction; restitution; density; isSensor[isSensor | isNoSensor]; SHAPE_DEFINITION( ... ) )
+
+SHAPE_DEFINITION( circle; position_x; position_y; radius; )
+SHAPE_DEFINITION( edge; v1_x; v1_y; v2_x; v2_y; )
+SHAPE_DEFINITION( axisAlignedBox; hx; hy; )
+SHAPE_DEFINITION( orientedBox; hx; hy; center_x; center_y; angle; )
+SHAPE_DEFINITION( polygon; countOfVertices; v1_x; v1_y; v2_x; v2_y; v3_x; v3_y; v4_x; v4_y; v5_x; v5_y; v6_x; v6_y; v7_x; v7_y; v8_x; v8_y; )
