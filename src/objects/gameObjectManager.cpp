@@ -8,11 +8,11 @@
 #include <objects/gameObjectManager.hpp>
 namespace objects{
 
-    void GameObjectManager::createSpacialObject( std::string spacialObjectId, std::string visualAppearanceId, b2BodyDef* bodyDefinition, b2FixtureDef* fixtureDefinition )
+/*    void GameObjectManager::createSpacialObject( std::string spacialObjectId, std::string visualAppearanceId, b2BodyDef* bodyDefinition, b2FixtureDef* fixtureDefinition )
     {
         SpacialObject* temporaryObject = new SpacialObject( spacialObjectId, visualAppearanceId, bodyDefinition, fixtureDefinition );
         this->spacialObjects_.push_back( temporaryObject );
-    }
+    }*/
 
     VisualAppearance* GameObjectManager::provideVisualAppearance( std::string visualAppearanceId )
     {
@@ -21,6 +21,20 @@ namespace objects{
         {
             std::string foostr = (*it)->getVisualAppearanceId();
             if( visualAppearanceId.compare( (*it)->getVisualAppearanceId() ) == 0 )
+            {
+                return (*it);
+            }
+        }
+        //throw exception
+        exit(1);
+    }
+
+    Material* GameObjectManager::provideMaterial( std::string materialId )
+    {
+        std::vector< Material* >::iterator it;
+        for( it = this->materialLibrary_.begin(); it < this->materialLibrary_.end(); it++ )
+        {
+            if( materialId.compare( (*it)->getMaterialId() ) == 0 )
             {
                 return (*it);
             }
@@ -46,8 +60,9 @@ namespace objects{
     //std::string* spacialObjectId, float posX, float posY, PositionInZ posZ, float orientation, bool collides, float collisionR, std::string* visualAppearanceId
     void GameObjectManager::loadObjects( std::string spacialObjectsFile )
     {
-        FileData* dataFromFile = fetchFileData( &spacialObjectsFile, 38 );
+        FileData* dataFromFile = fetchFileData( &spacialObjectsFile, 4 );
         FileData::iterator itData;
+
         for( itData = dataFromFile->begin(); itData < dataFromFile->end(); itData++ )
         {
             FileEntry::iterator itEntry;
@@ -56,9 +71,97 @@ namespace objects{
 
             std::string objectId = (*itEntry);
             itEntry++;
+            std::string materialId = (*itEntry);
+            itEntry++;
+            b2Vec2 position;
+            position.x = atof((*itEntry).c_str());
+            itEntry++;
+            position.y = atof((*itEntry).c_str());
+
+            SpacialObject* temporaryObject = new SpacialObject( objectId, materialId, position );
+            if( temporaryObject != NULL )
+            {
+                this->spacialObjects_.push_back( temporaryObject );
+            }
+        }
+
+    }
+
+    FileData* GameObjectManager::fetchFileData( std::string* fileName, int fields )
+    {
+        std::ifstream ifs( fileName->c_str(), std::ifstream::in );
+        if( ifs.is_open() ){
+            char* buffer;
+            int length;
+
+            ifs.seekg( 0,std::ios::end );
+            length = ifs.tellg();
+            ifs.seekg( 0,std::ios::beg );
+
+            buffer = new char[ length ];
+            for(int i = 0; i < length; i++){
+                buffer[i]=0;
+            }
+
+            ifs.read( buffer, length );
+            ifs.close();
+
+            std::string tmp;
+            tmp.clear();
+            tmp.assign(buffer);
+
+            delete[] buffer;
+
+            unsigned int lastPos = 0;
+            unsigned int lastCarriageRet = 0;
+            FileData* tmpData = new FileData();
+            std::string entryDivider ("!");
+            std::string dataDivider (";");
+            unsigned int foo = entryDivider.length();
+            unsigned int goo = dataDivider.length();
+            while( tmp.find( dataDivider, lastPos ) != std::string::npos && tmp.find( entryDivider, lastCarriageRet ) != std::string::npos )
+            {
+                unsigned int nextCarriageRet = tmp.find( entryDivider, lastCarriageRet );
+                FileEntry tmpEntry;
+                while( tmp.find( dataDivider, lastPos ) != std::string::npos && tmp.find( dataDivider, lastPos ) < nextCarriageRet)
+                {
+                    unsigned int nextPos = tmp.find( dataDivider, lastPos );
+                    std::string tmpstr = tmp.substr( lastPos, (nextPos - lastPos) );
+                    tmpEntry.push_back( tmpstr );
+
+                    lastPos = nextPos+goo;
+                }
+                lastCarriageRet = nextCarriageRet+foo+2;
+                lastPos = lastCarriageRet;
+                tmpData->push_back( tmpEntry );
+                tmpEntry.clear();
+            }
+            return tmpData;
+        }
+        exit(1);
+    }
+
+    void GameObjectManager::loadMaterials( std::string materialFile )
+    {
+        FileData* dataFromFile = fetchFileData( &materialFile, 24 );
+        FileData::iterator itData;
+
+        for( itData = dataFromFile->begin(); itData < dataFromFile->end(); itData++ )
+        {
+            FileEntry::iterator itEntry;
+            FileEntry tmp = (*itData);
+            itEntry = tmp.begin();
+
+            std::string materialId = (*itEntry);
+            itEntry++;
             std::string visualAppearanceId = (*itEntry);
             itEntry++;
+
             b2BodyDef bodyDefinition;
+
+            bodyDefinition.position.x = 0.0;
+            bodyDefinition.position.y = 0.0;
+
             if( (*itEntry).compare( "static" ) == 0 ){
                 bodyDefinition.type = b2_staticBody;
             }
@@ -71,10 +174,6 @@ namespace objects{
             else{
                 exit(1);
             }
-            itEntry++;
-            bodyDefinition.position.x = atof((*itEntry).c_str());;
-            itEntry++;
-            bodyDefinition.position.y = atof((*itEntry).c_str());;
             itEntry++;
             bodyDefinition.angle = atof((*itEntry).c_str());
             itEntry++;
@@ -169,136 +268,76 @@ namespace objects{
                 itEntry++;
                 tmpCircle.m_radius = atof((*itEntry).c_str());
 
-                fixtureDefinition.shape = &tmpCircle;
+                Material* temporaryMaterial = new Material( materialId, visualAppearanceId, bodyDefinition, fixtureDefinition, angleOffsetForAnimation, tmpCircle );
+                this->materialLibrary_.push_back( temporaryMaterial );
             }
-            else if( (*itEntry).compare( "edge" ) == 0 ){
-                itEntry++;
-                b2Vec2 v1,v2;
-                v1.x = atof((*itEntry).c_str());
-                itEntry++;
-                v1.y = atof((*itEntry).c_str());
-                itEntry++;
-                v2.x = atof((*itEntry).c_str());
-                itEntry++;
-                v2.y = atof((*itEntry).c_str());
+            else
+            {
 
-                tmpBox.SetAsEdge( v1, v2 );
-
-                fixtureDefinition.shape = &tmpBox;
-            }
-            else if( (*itEntry).compare( "axisAlignedBox" ) == 0 ){
-                itEntry++;
-
-                b2Vec2 v1;
-                v1.x = atof((*itEntry).c_str());
-                itEntry++;
-                v1.y = atof((*itEntry).c_str());
-
-                tmpBox.SetAsBox( v1.x, v1.y );
-
-                fixtureDefinition.shape = &tmpBox;
-            }
-            else if( (*itEntry).compare( "orientedBox" ) == 0 ){
-                itEntry++;
-                b2Vec2 v1,v2;
-                v1.x = atof((*itEntry).c_str());
-                itEntry++;
-                v1.y = atof((*itEntry).c_str());
-                itEntry++;
-                v2.x = atof((*itEntry).c_str());
-                itEntry++;
-                v2.y = atof((*itEntry).c_str());
-                itEntry++;
-                float  angle = atof((*itEntry).c_str());
-                angleOffsetForAnimation = angle;
-                tmpBox.SetAsBox( v1.x, v1.y, v2, angle);
-
-                fixtureDefinition.shape = &tmpBox;
-            }
-            else if( (*itEntry).compare( "polygon" ) == 0 ){
-                itEntry++;
-                int countVertices = atoi((*itEntry).c_str());
-
-                b2Vec2 vertices[ b2_maxPolygonVertices ];
-
-                for( int i = 0; i < countVertices; i++ ){
-                    b2Vec2 v1;
+                if( (*itEntry).compare( "edge" ) == 0 ){
                     itEntry++;
+                    b2Vec2 v1,v2;
+                    v1.x = atof((*itEntry).c_str());
+                    itEntry++;
+                    v1.y = atof((*itEntry).c_str());
+                    itEntry++;
+                    v2.x = atof((*itEntry).c_str());
+                    itEntry++;
+                    v2.y = atof((*itEntry).c_str());
+
+                    tmpBox.SetAsEdge( v1, v2 );
+                }
+                else if( (*itEntry).compare( "axisAlignedBox" ) == 0 ){
+                    itEntry++;
+
+                    b2Vec2 v1;
                     v1.x = atof((*itEntry).c_str());
                     itEntry++;
                     v1.y = atof((*itEntry).c_str());
 
-                    vertices[i].Set( v1.x, v1.y );
+                    tmpBox.SetAsBox( v1.x, v1.y );
                 }
-                tmpBox.Set( vertices, countVertices );
+                else if( (*itEntry).compare( "orientedBox" ) == 0 ){
+                    itEntry++;
+                    b2Vec2 v1,v2;
+                    v1.x = atof((*itEntry).c_str());
+                    itEntry++;
+                    v1.y = atof((*itEntry).c_str());
+                    itEntry++;
+                    v2.x = atof((*itEntry).c_str());
+                    itEntry++;
+                    v2.y = atof((*itEntry).c_str());
+                    itEntry++;
+                    float  angle = atof((*itEntry).c_str());
+                    angleOffsetForAnimation = angle;
+                    tmpBox.SetAsBox( v1.x, v1.y, v2, angle);
+                }
+                else if( (*itEntry).compare( "polygon" ) == 0 ){
+                    itEntry++;
+                    int countVertices = atoi((*itEntry).c_str());
 
-                fixtureDefinition.shape = &tmpBox;
-            }
-            else{
-                exit(1);
-            }
+                    b2Vec2 vertices[ b2_maxPolygonVertices ];
 
-            SpacialObject* temporaryObject = new SpacialObject( objectId, visualAppearanceId, &bodyDefinition, &fixtureDefinition );
-            if( temporaryObject != NULL )
-            {
-                temporaryObject->setAngleOffsetForAnimation( angleOffsetForAnimation );
-                this->spacialObjects_.push_back( temporaryObject );
-            }
-        }
-    }
+                    for( int i = 0; i < countVertices; i++ ){
+                        b2Vec2 v1;
+                        itEntry++;
+                        v1.x = atof((*itEntry).c_str());
+                        itEntry++;
+                        v1.y = atof((*itEntry).c_str());
 
-    FileData* GameObjectManager::fetchFileData( std::string* fileName, int fields )
-    {
-        std::ifstream ifs( fileName->c_str(), std::ifstream::in );
-        if( ifs.is_open() ){
-            char* buffer;
-            int length;
-
-            ifs.seekg( 0,std::ios::end );
-            length = ifs.tellg();
-            ifs.seekg( 0,std::ios::beg );
-
-            buffer = new char[ length ];
-            for(int i = 0; i < length; i++){
-                buffer[i]=0;
-            }
-
-            ifs.read( buffer, length );
-            ifs.close();
-
-            std::string tmp;
-            tmp.clear();
-            tmp.assign(buffer);
-
-            delete[] buffer;
-
-            unsigned int lastPos = 0;
-            unsigned int lastCarriageRet = 0;
-            FileData* tmpData = new FileData();
-            std::string entryDivider ("!");
-            std::string dataDivider (";");
-            unsigned int foo = entryDivider.length();
-            unsigned int goo = dataDivider.length();
-            while( tmp.find( dataDivider, lastPos ) != std::string::npos && tmp.find( entryDivider, lastCarriageRet ) != std::string::npos )
-            {
-                unsigned int nextCarriageRet = tmp.find( entryDivider, lastCarriageRet );
-                FileEntry tmpEntry;
-                while( tmp.find( dataDivider, lastPos ) != std::string::npos && tmp.find( dataDivider, lastPos ) < nextCarriageRet)
+                        vertices[i].Set( v1.x, v1.y );
+                    }
+                    tmpBox.Set( vertices, countVertices );
+                }
+                else
                 {
-                    unsigned int nextPos = tmp.find( dataDivider, lastPos );
-                    std::string tmpstr = tmp.substr( lastPos, (nextPos - lastPos) );
-                    tmpEntry.push_back( tmpstr );
-
-                    lastPos = nextPos+goo;
+                    exit(1);
                 }
-                lastCarriageRet = nextCarriageRet+foo+2;
-                lastPos = lastCarriageRet;
-                tmpData->push_back( tmpEntry );
-                tmpEntry.clear();
+                Material* temporaryMaterial = new Material( materialId, visualAppearanceId, bodyDefinition, fixtureDefinition, angleOffsetForAnimation, tmpBox );
+                this->materialLibrary_.push_back( temporaryMaterial );
             }
-            return tmpData;
+
         }
-        exit(1);
     }
 
     // std::string* visualAppearanceId; std::string* animationsDescriptionFile

@@ -18,7 +18,8 @@ namespace objects
             b2Body* getB2Body();
             VisualAppearance* getVisualAppearance();
             bool standsOnSomething();
-            SpacialObject( std::string spacialObjectId, std::string visualAppearanceId, b2BodyDef* bodyDefinition, b2FixtureDef* fixtureDefinition );
+
+            SpacialObject( std::string spacialObjectId, std::string materialId, b2Vec2 position );
                             /*string* audialAppearanceId,*/ /*float objectHealth,*/ /*float objectHardness*/
             ~SpacialObject();
     	protected:

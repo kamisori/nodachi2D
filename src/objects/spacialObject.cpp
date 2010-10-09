@@ -64,20 +64,36 @@ namespace objects
         return false;
     }
 
-    SpacialObject::SpacialObject( std::string spacialObjectId, std::string visualAppearanceId, b2BodyDef* bodyDefinition, b2FixtureDef* fixtureDefinition )
+    SpacialObject::SpacialObject( std::string spacialObjectId, std::string materialId, b2Vec2 position )
     {
-        std::cout <<"created "<<spacialObjectId<<std::endl;;
         spacialObjectId_.assign( spacialObjectId );
 
-        this->visualAppearance_ = b2WorldAndVisualWorld.globalGameObjectManager_->provideVisualAppearance( visualAppearanceId );
+        Material* temporaryMaterial;
+        temporaryMaterial = b2WorldAndVisualWorld.globalGameObjectManager_->provideMaterial( materialId );
+
+        this->visualAppearance_ = b2WorldAndVisualWorld.globalGameObjectManager_->provideVisualAppearance( temporaryMaterial->getVisualAppearanceId() );
 
         std::string visId ("static");
         this->visualAppearance_->setCurrentAnimationByAnimationId( visId );
 
+        b2FixtureDef fixtureDefinition = temporaryMaterial->getFixtureDefinition();
+        b2BodyDef bodyDefinition = temporaryMaterial->getBodyDefinition();
 
-        bodyDefinition->userData = this;
-        this->b2Body_ = b2WorldAndVisualWorld.simulatedWorld_->CreateBody( bodyDefinition );
-        this->b2Body_->CreateFixture( fixtureDefinition );
+        bodyDefinition.userData = this;
+        bodyDefinition.position = position;
+        this->b2Body_ = b2WorldAndVisualWorld.simulatedWorld_->CreateBody( &bodyDefinition );
+
+        if( temporaryMaterial->thisIsACircle() )
+        {
+            fixtureDefinition.shape = temporaryMaterial->getCircleShape();
+        }
+        else
+        {
+            fixtureDefinition.shape = temporaryMaterial->getPolygonShape();
+        }
+
+        this->b2Body_->CreateFixture( &fixtureDefinition );
+        this->setAngleOffsetForAnimation( temporaryMaterial->getAngleOffsetForAnimation() );
     }
 
     SpacialObject::~SpacialObject()
