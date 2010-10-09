@@ -14,6 +14,7 @@ GameWorld::GameWorld()
     this->globalGameObjectManager_ = new objects::GameObjectManager();
 
     b2Vec2 gravity(0.0,-9.8);
+
     bool doSleep = true;
     this->simulatedWorld_ = new b2World(gravity, doSleep);
 
@@ -21,6 +22,7 @@ GameWorld::GameWorld()
     this->globalGameObjectManager_->loadMaterials( materialFile );
     this->globalGameObjectManager_->loadObjects( objectFile );
 }
+
 GameWorld::~GameWorld(){
     delete this->globalGameObjectManager_;
 }

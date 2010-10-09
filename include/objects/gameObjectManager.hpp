@@ -17,16 +17,16 @@ namespace objects
     {
     	public:
 
-//            void createSpacialObject( std::string spacialObjectId, std::string visualAppearanceId, b2BodyDef* bodyDefinition, b2FixtureDef* fixtureDefinition );
+
             VisualAppearance* provideVisualAppearance( std::string visualAppearanceId );
             Material* provideMaterial( std::string materialId );
-//            AudioAppearance* provideAudioAppearance( std::string* audioAppearanceId );
+
             SpacialObject* nextSpacialObject( int current );
 
             void loadObjects( std::string spacialObjectsFile );
             void loadVisualAppearances( std::string visualAppearanceFile );
             void loadMaterials( std::string materialFile );
-//            void loadAudioAppearances( std::string* audioAppearanceFile );
+
 
             FileData* fetchFileData( std::string* fileName, int fields );
 
@@ -39,8 +39,6 @@ namespace objects
     	std::vector< SpacialObject* >       spacialObjects_;
     	std::vector< VisualAppearance* >    visualAppearancesLibrary_;
     	std::vector< Material* >            materialLibrary_;
-//    	std::vector< AudioAppearance* >     audioAppearancesLibrary_;
-//      std::vector< Script* >              scriptLibrary_;
     };
 
 }

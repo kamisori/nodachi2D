@@ -6,7 +6,6 @@
 #include <main.hpp>
 #include <Box2D/Box2D.h>
 #include <Box2D/Dynamics/Contacts/b2Contact.h>
-#include <iostream>
 
 namespace objects
 {
@@ -76,23 +75,25 @@ namespace objects
         std::string visId ("static");
         this->visualAppearance_->setCurrentAnimationByAnimationId( visId );
 
-        b2FixtureDef fixtureDefinition = temporaryMaterial->getFixtureDefinition();
-        b2BodyDef bodyDefinition = temporaryMaterial->getBodyDefinition();
+        b2FixtureDef* fixtureDefinition = temporaryMaterial->createFixtureDefinition();
+        b2BodyDef* bodyDefinition = temporaryMaterial->createBodyDefinition();
 
-        bodyDefinition.userData = this;
-        bodyDefinition.position = position;
-        this->b2Body_ = b2WorldAndVisualWorld.simulatedWorld_->CreateBody( &bodyDefinition );
+        bodyDefinition->userData = this;
+        bodyDefinition->position.x = position.x;
+        bodyDefinition->position.y = position.y;
+        this->b2Body_ = b2WorldAndVisualWorld.simulatedWorld_->CreateBody( bodyDefinition );
+
 
         if( temporaryMaterial->thisIsACircle() )
         {
-            fixtureDefinition.shape = temporaryMaterial->getCircleShape();
+            fixtureDefinition->shape = temporaryMaterial->createCircleShape();
         }
         else
         {
-            fixtureDefinition.shape = temporaryMaterial->getPolygonShape();
+            fixtureDefinition->shape = temporaryMaterial->createPolygonShape();
         }
 
-        this->b2Body_->CreateFixture( &fixtureDefinition );
+        this->b2Body_->CreateFixture( fixtureDefinition );
         this->setAngleOffsetForAnimation( temporaryMaterial->getAngleOffsetForAnimation() );
     }
 

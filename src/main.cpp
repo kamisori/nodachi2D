@@ -7,22 +7,26 @@
 #include <stdio.h>
 #include <objects/spacialObject.hpp>
 
+struct flags{
+    bool Running;
+}globalflags;
 bool ApplyForceUpwardToPlayer = false;
 bool ApplyForceLeftToPlayer = false;
 bool ApplyForceRightToPlayer = false;
 bool ApplyForceDownwardToPlayer = false;
 bool Restart = false;
-bool Running = true;
+
 sf::Mutex GlobalMutex;
 GameWorld b2WorldAndVisualWorld;
-
+sf::Vector2f resolution;
 sf::Clock Clock_;
 
 void inputThread(void* UserData)
 {
     sf::Window* app = static_cast<sf::Window*>(UserData);
     const sf::Input* keyInput = &app->GetInput();
-    while(Running){
+    while( globalflags.Running )
+    {
         GlobalMutex.Lock();
         ApplyForceLeftToPlayer = keyInput->IsKeyDown(sf::Key::Left);
         ApplyForceRightToPlayer = keyInput->IsKeyDown(sf::Key::Right);
@@ -34,10 +38,13 @@ void inputThread(void* UserData)
 
 int main()
 {
+    resolution.x = 800;
+    resolution.y = 600;
+
     //load settings and stuff
-    sf::FloatRect ViewRect = sf::FloatRect(0, 0, 800, 600);
+    sf::FloatRect ViewRect = sf::FloatRect(0, 0, resolution.x, resolution.y);
     sf::View twoDCam = sf::View(ViewRect);
-    sf::RenderWindow App(sf::VideoMode(800, 600, 32), "nodachi2D");
+    sf::RenderWindow App(sf::VideoMode(resolution.x, resolution.y, 32), "nodachi2D");
     App.UseVerticalSync(true);
     App.SetView(twoDCam);
 
@@ -48,7 +55,7 @@ int main()
     sf::Thread inputHandler(&inputThread, &App);
     inputHandler.Launch();
 
-    while (Running)
+    while (globalflags.Running)
     {
 ////////////////////            logic
         sf::Event Event;
@@ -57,7 +64,7 @@ int main()
             // Window closed
             if (Event.Type == sf::Event::Closed){
                 App.Close();
-                Running = false;
+                globalflags.Running = false;
             }
 
             // Escape key pressed
@@ -92,8 +99,16 @@ int main()
             objects::Animation* tmpAnim = tmpObject->getVisualAppearance()->getCurrentAnimation();
 
             b2Vec2 position = tmpB2Body->GetPosition();
+
             float32 angle = tmpB2Body->GetAngle();
             std::string object = tmpObject->getSpacialObjectId();
+
+            if(tmpB2Body->IsFixedRotation()){
+                std::cout << "object can not rotate " << object << std::endl;
+            }
+            else{
+                std::cout << "object can rotate " << object << std::endl;
+            }
 
             GlobalMutex.Lock();
             if( object.compare( "player" ) == 0 ){
@@ -181,7 +196,6 @@ int main()
         }
         App.Display();
         App.Clear();
-        //std::cout << "drawing took: " << Clock_.GetElapsedTime() << std::endl;
     }
     return EXIT_SUCCESS;
 }

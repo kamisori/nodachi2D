@@ -10,7 +10,7 @@ namespace objects
         }
     }
 
-    //increase currentFrame_ and return new current Sprite*
+
     sf::Sprite* Animation::getNextFrame()
     {
         this->iterateToNextFrame();
@@ -22,8 +22,9 @@ namespace objects
         return this->animationId_;
     }
 
-    //data will be provided from a csv style file something like "running_fox_north";"fox1.bmp";3;5; with 3 rows of frames and 5 collumns
-    Animation::Animation( std::string animationId, std::string fileName, sf::Vector2i rowsAndCollumns, int delayPerFrameInMs ){
+
+    Animation::Animation( std::string animationId, std::string fileName, sf::Vector2i rowsAndCollumns, int delayPerFrameInMs )
+    {
         this->allFrames_ = new sf::Image();
 
         this->animationId_ = animationId;
@@ -36,6 +37,7 @@ namespace objects
 
             imageDimensions->y = this->allFrames_->GetHeight();
             imageDimensions->x = this->allFrames_->GetWidth();
+
             spriteDimensions->y = imageDimensions->y / rowsAndCollumns.y;
             spriteDimensions->x = imageDimensions->x / rowsAndCollumns.x;
 
