@@ -8,82 +8,11 @@
 #include <objects/gameObjectManager.hpp>
 namespace objects{
 
-
-    VisualAppearance* GameObjectManager::provideVisualAppearance( std::string visualAppearanceId )
-    {
-        std::vector< VisualAppearance* >::iterator it;
-        for( it = this->visualAppearancesLibrary_.begin(); it < this->visualAppearancesLibrary_.end(); it++ )
-        {
-            std::string foostr = (*it)->getVisualAppearanceId();
-            if( visualAppearanceId.compare( (*it)->getVisualAppearanceId() ) == 0 )
-            {
-                return (*it);
-            }
-        }
-        //throw exception
-        exit(1);
-    }
-
-    Material* GameObjectManager::provideMaterial( std::string materialId )
-    {
-        std::vector< Material* >::iterator it;
-        for( it = this->materialLibrary_.begin(); it < this->materialLibrary_.end(); it++ )
-        {
-            if( materialId.compare( (*it)->getMaterialId() ) == 0 )
-            {
-                return (*it);
-            }
-        }
-        //throw exception
-        exit(1);
-    }
-
-    SpacialObject* GameObjectManager::nextSpacialObject( int current )
-    {
-         std::vector< SpacialObject* >::iterator it;
-         it = this->spacialObjects_.begin();
-         it += current;
-         if( it < this->spacialObjects_.end() )
-         {
-            return (*it);
-         }
-         return NULL;
-    }
-
-
-    void GameObjectManager::loadObjects( std::string spacialObjectsFile )
-    {
-        FileData* dataFromFile = fetchFileData( &spacialObjectsFile, 4 );
-        FileData::iterator itData;
-
-        for( itData = dataFromFile->begin(); itData < dataFromFile->end(); itData++ )
-        {
-            FileEntry::iterator itEntry;
-            FileEntry tmp = (*itData);
-            itEntry = tmp.begin();
-
-            std::string objectId = (*itEntry);
-            itEntry++;
-            std::string materialId = (*itEntry);
-            itEntry++;
-            b2Vec2 position;
-            position.x = atof((*itEntry).c_str());
-            itEntry++;
-            position.y = atof((*itEntry).c_str());
-
-            SpacialObject* temporaryObject = new SpacialObject( objectId, materialId, position );
-            if( temporaryObject != NULL )
-            {
-                this->spacialObjects_.push_back( temporaryObject );
-            }
-        }
-    }
-
-    FileData* GameObjectManager::fetchFileData( std::string* fileName, int fields )
+    char* GameObjectManager::fetchFileData( std::string* fileName, int fields )
     {
         std::ifstream ifs( fileName->c_str(), std::ifstream::in );
+        char* buffer;
         if( ifs.is_open() ){
-            char* buffer;
             int length;
 
             ifs.seekg( 0,std::ios::end );
@@ -97,45 +26,62 @@ namespace objects{
 
             ifs.read( buffer, length );
             ifs.close();
-
-            std::string tmp;
-            tmp.clear();
-            tmp.assign(buffer);
-
-            delete[] buffer;
-
-            unsigned int lastPos = 0;
-            unsigned int lastCarriageRet = 0;
-            FileData* tmpData = new FileData();
-            std::string entryDivider ("!");
-            std::string dataDivider (";");
-            unsigned int foo = entryDivider.length();
-            unsigned int goo = dataDivider.length();
-            while( tmp.find( dataDivider, lastPos ) != std::string::npos && tmp.find( entryDivider, lastCarriageRet ) != std::string::npos )
-            {
-                unsigned int nextCarriageRet = tmp.find( entryDivider, lastCarriageRet );
-                FileEntry tmpEntry;
-                while( tmp.find( dataDivider, lastPos ) != std::string::npos && tmp.find( dataDivider, lastPos ) < nextCarriageRet)
-                {
-                    unsigned int nextPos = tmp.find( dataDivider, lastPos );
-                    std::string tmpstr = tmp.substr( lastPos, (nextPos - lastPos) );
-                    tmpEntry.push_back( tmpstr );
-
-                    lastPos = nextPos+goo;
-                }
-                lastCarriageRet = nextCarriageRet+foo+2;
-                lastPos = lastCarriageRet;
-                tmpData->push_back( tmpEntry );
-                tmpEntry.clear();
-            }
-            return tmpData;
+            return buffer;
         }
         exit(1);
     }
 
+    FileEntry* GameObjectManager::parseFileEntry( std::string* entry, std::string* dataDivider )
+    {
+        unsigned int lastData = 0;
+        unsigned int nextData = entry->find( (*dataDivider), lastData );
+        unsigned int dataLength = nextData - lastData;
+        FileEntry* tmpEntry = new FileEntry();
+
+        while( ( nextData != std::string::npos) && ( nextData < entry->length()) )
+        {
+            std::string tmpstr = entry->substr( lastData, dataLength );
+            tmpEntry->push_back( tmpstr );
+
+            lastData = nextData + dataDivider->length();
+            nextData = entry->find( (*dataDivider), lastData );
+            dataLength = nextData - lastData;
+        }
+
+        return tmpEntry;
+    }
+
+    FileData* GameObjectManager::parseFileData( std::string* fileName, int fields )
+    {
+        std::string fileContent;
+        fileContent.clear();
+        fileContent.assign( fetchFileData( fileName, fields ) );
+
+        std::string entryDivider ("\r\n");
+        std::string dataDivider (";");
+
+        unsigned int lastEntry = 0;
+        unsigned int nextEntry = fileContent.find( entryDivider, lastEntry );
+        unsigned int entryLength = nextEntry - lastEntry;
+        FileData* tmpData = new FileData();
+
+        while( (nextEntry != std::string::npos) && ( nextEntry < fileContent.length() ) )
+        {
+            std::string temporaryEntryString = fileContent.substr( lastEntry, entryLength );
+            FileEntry* tmpEntry = parseFileEntry( &temporaryEntryString, &dataDivider );
+            tmpData->push_back( (*tmpEntry) );
+
+            lastEntry = nextEntry+entryDivider.length();
+            nextEntry = fileContent.find( entryDivider, lastEntry );
+            entryLength = nextEntry - lastEntry;
+        }
+        return tmpData;
+    }
+
+
     void GameObjectManager::loadMaterials( std::string materialFile )
     {
-        FileData* dataFromFile = fetchFileData( &materialFile, 24 );
+        FileData* dataFromFile = parseFileData( &materialFile, 24 );
         FileData::iterator itData;
 
         for( itData = dataFromFile->begin(); itData < dataFromFile->end(); itData++ )
@@ -342,10 +288,9 @@ namespace objects{
         }
     }
 
-    // std::string* visualAppearanceId; std::string* animationsDescriptionFile
     void GameObjectManager::loadVisualAppearances( std::string visualAppearanceFile )
     {
-        FileData* dataFromFile = fetchFileData( &visualAppearanceFile, 2 );
+        FileData* dataFromFile = parseFileData( &visualAppearanceFile, 2 );
         FileData::iterator itData;
 
         for( itData = dataFromFile->begin(); itData < dataFromFile->end(); itData++ )
@@ -363,7 +308,72 @@ namespace objects{
         }
     }
 
-//    void GameObjectManager::loadAudioAppearances( std::string* audioAppearanceFile )
+    void GameObjectManager::loadObjects( std::string spacialObjectsFile )
+    {
+        FileData* dataFromFile = parseFileData( &spacialObjectsFile, 4 );
+        FileData::iterator itData;
+
+        for( itData = dataFromFile->begin(); itData < dataFromFile->end(); itData++ )
+        {
+            FileEntry::iterator itEntry;
+            FileEntry tmp = (*itData);
+            itEntry = tmp.begin();
+
+            std::string objectId = (*itEntry);
+            itEntry++;
+            std::string materialId = (*itEntry);
+            itEntry++;
+            b2Vec2 position;
+            position.x = atof((*itEntry).c_str());
+            itEntry++;
+            position.y = atof((*itEntry).c_str());
+
+            SpacialObject* temporaryObject = new SpacialObject( objectId, materialId, position );
+            if( temporaryObject != NULL )
+            {
+                this->spacialObjects_.push_back( temporaryObject );
+            }
+        }
+    }
+
+    VisualAppearance* GameObjectManager::provideVisualAppearance( std::string visualAppearanceId )
+    {
+        std::vector< VisualAppearance* >::iterator it;
+        for( it = this->visualAppearancesLibrary_.begin(); it < this->visualAppearancesLibrary_.end(); it++ )
+        {
+            std::string foostr = (*it)->getVisualAppearanceId();
+            if( visualAppearanceId.compare( (*it)->getVisualAppearanceId() ) == 0 )
+            {
+                return (*it);
+            }
+        }
+        exit(1);
+    }
+
+    Material* GameObjectManager::provideMaterial( std::string materialId )
+    {
+        std::vector< Material* >::iterator it;
+        for( it = this->materialLibrary_.begin(); it < this->materialLibrary_.end(); it++ )
+        {
+            if( materialId.compare( (*it)->getMaterialId() ) == 0 )
+            {
+                return (*it);
+            }
+        }
+        exit(1);
+    }
+
+    SpacialObject* GameObjectManager::nextSpacialObject( int current )
+    {
+         std::vector< SpacialObject* >::iterator it;
+         it = this->spacialObjects_.begin();
+         it += current;
+         if( it < this->spacialObjects_.end() )
+         {
+            return (*it);
+         }
+         return NULL;
+    }
 
     GameObjectManager::GameObjectManager()
     {
@@ -373,5 +383,6 @@ namespace objects{
     {
         this->spacialObjects_.clear();
         this->visualAppearancesLibrary_.clear();
+        this->materialLibrary_.clear();
     }
 }

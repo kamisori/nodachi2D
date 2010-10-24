@@ -16,25 +16,23 @@ namespace objects
     class GameObjectManager
     {
     	public:
+            FileData* parseFileData( std::string* fileName, int fields );
 
+            void loadMaterials( std::string materialFile );
+            void loadVisualAppearances( std::string visualAppearanceFile );
+            void loadObjects( std::string spacialObjectsFile );
 
             VisualAppearance* provideVisualAppearance( std::string visualAppearanceId );
             Material* provideMaterial( std::string materialId );
 
             SpacialObject* nextSpacialObject( int current );
 
-            void loadObjects( std::string spacialObjectsFile );
-            void loadVisualAppearances( std::string visualAppearanceFile );
-            void loadMaterials( std::string materialFile );
-
-
-            FileData* fetchFileData( std::string* fileName, int fields );
-
     		GameObjectManager();
     		~GameObjectManager();
-    	protected:
-
     	private:
+    	FileEntry* parseFileEntry( std::string* entry, std::string* dataDivider );
+    	char* fetchFileData( std::string* fileName, int fields );
+
     	SpacialObject*                      player_;
     	std::vector< SpacialObject* >       spacialObjects_;
     	std::vector< VisualAppearance* >    visualAppearancesLibrary_;

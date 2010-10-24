@@ -1,3 +1,3 @@
-crate_wood;crate_wood;dynamic;0;0;0;0;0;0;allowSleep;awake;allowRotation;isNoBullet;active;0.3;0.0;1.0;isNoSensor;orientedBox;0.5;0.5;0.0;0.0;0.0;!
-player;crate_wood;dynamic;0;0;0;0;0;0;allowSleep;awake;denyRotation;isNoBullet;active;0.6;0.0;1.0;isNoSensor;orientedBox;0.5;0.5;0.0;0.0;0.0;!
-wall_concrete;block_concrete;static;0;0;0;0;0;0;allowSleep;awake;denyRotation;isNoBullet;active;0.2;0.0;0.0;isNoSensor;axisAlignedBox;0.5;0.5;!
+crate_wood;crate_wood;dynamic;0;0;0;0;0;0;allowSleep;awake;allowRotation;isNoBullet;active;0.3;0.0;1.0;isNoSensor;orientedBox;0.5;0.5;0.0;0.0;0.0;
+player;crate_wood;dynamic;0;0;0;0;0;0;allowSleep;awake;denyRotation;isNoBullet;active;0.6;0.0;1.0;isNoSensor;orientedBox;0.5;0.5;0.0;0.0;0.0;
+wall_concrete;block_concrete;static;0;0;0;0;0;0;allowSleep;awake;denyRotation;isNoBullet;active;0.2;0.0;0.0;isNoSensor;axisAlignedBox;0.5;0.5;

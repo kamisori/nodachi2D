@@ -39,7 +39,7 @@ namespace objects
     {
         this->visualAppearanceId_ = visualAppearanceId;
 
-        FileData* dataFromFile = b2WorldAndVisualWorld.globalGameObjectManager_->fetchFileData( &animationsDescriptionFile, 5 );
+        FileData* dataFromFile = b2WorldAndVisualWorld.globalGameObjectManager_->parseFileData( &animationsDescriptionFile, 5 );
 
         FileData::iterator itData;
         for( itData = dataFromFile->begin(); itData < dataFromFile->end(); itData++ )

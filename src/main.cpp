@@ -38,6 +38,7 @@ void inputThread(void* UserData)
 
 int main()
 {
+    globalflags.Running = true;
     resolution.x = 800;
     resolution.y = 600;
 
@@ -71,7 +72,7 @@ int main()
             if ((Event.Type == sf::Event::KeyPressed)){
                 if((Event.Key.Code == sf::Key::Escape)){
                     App.Close();
-                    Running = false;
+                    globalflags.Running = false;
                 }
             }
 
