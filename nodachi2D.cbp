@@ -14,9 +14,10 @@
 				<Compiler>
 					<Add option="-g" />
 					<Add option="-DSFML_DYNAMIC" />
-					<Add directory="include" />
 				</Compiler>
 				<Linker>
+					<Add option="-lsfml-network" />
+					<Add option="-lsfml-audio" />
 					<Add option="-lsfml-graphics" />
 					<Add option="-lsfml-window" />
 					<Add option="-lsfml-system" />
@@ -37,16 +38,24 @@
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
-					<Add option="-lsfml-graphics" />
-					<Add option="-lsfml-window" />
-					<Add option="-lsfml-system" />
 				</Linker>
 			</Target>
 		</Build>
 		<Compiler>
 			<Add option="-Wall" />
 			<Add option="-fexceptions" />
+			<Add directory="include" />
+			<Add directory="../sfml/inc" />
 		</Compiler>
+		<Linker>
+			<Add option="-lsfml-network" />
+			<Add option="-lsfml-audio" />
+			<Add option="-lsfml-graphics" />
+			<Add option="-lsfml-window" />
+			<Add option="-lsfml-system" />
+			<Add directory="../work/sfml_1.6/lib" />
+			<Add directory="../work/sfml_2.0/lib" />
+		</Linker>
 		<Unit filename="include/Box2D/Box2D.h" />
 		<Unit filename="include/Box2D/Collision/Shapes/b2CircleShape.cpp" />
 		<Unit filename="include/Box2D/Collision/Shapes/b2CircleShape.h" />
