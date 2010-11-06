@@ -1,0 +1,52 @@
+This is a 2d jump and run game engine. It should be possible to also create a 2d space game and even a 2d eagles eye game, with minor modifications to the initialisation of box2d.
+
+
+
+It is neccessary to get Box2D and SFML and install/setup those according to the following instructions:
+
+
+
+                                        Box2D
+                                        -----
+posix:
+Put it anywhere you like and create a link to the folder containing the following files/folders:
+
+drwxr-xr-x 5 4096  3. Okt 12:54 .
+drwxr-xr-x 9 4096  3. Okt 12:54 ..
+-rw-r--r-- 1  191 28. Feb 2010  Box2DConfig.cmake
+-rw-r--r-- 1 2249  3. Apr 2010  Box2D.h
+-rw-r--r-- 1 5033 29. Mär 2010  CMakeLists.txt
+drwxr-xr-x 3 4096  3. Okt 12:54 Collision
+drwxr-xr-x 2 4096  3. Okt 12:54 Common
+drwxr-xr-x 4 4096  3. Okt 22:23 Dynamics
+
+The link goes to include/Box2D, like so:
+include/Box2D -> /home/kamisori/work/Box2D_v2.1.2/Box2D/Box2D/
+
+This way you can very simply switch to a new version of box2d if there should come any.
+Or if you plan to modify box2d you can switch between your version and the original one more easily.
+
+windows:
+probably it is best to put the folder Box2D containing the following files and folders directly into the include folder:
+
+folders:
+Collision
+Common
+Dynamics
+
+files:
+Box2DConfig.cmake
+Box2D.h
+CMakeLists.txt
+
+
+                                        SFML
+                                        ----
+
+posix:
+you need to build it from source, and use --prefix=/usr i think. at least i had some problems when i set it up months ago.
+If i remember correctly, the libsfml-*.so must go into /usr/lib, while building from source puts it into /usr/local/lib.
+
+windows:
+no idea. try getting the binaries, and probably put it into the project root folder and into the bin/debug and bin/release folders.
+
