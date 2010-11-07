@@ -127,15 +127,15 @@
 		<Unit filename="include/Box2D/Dynamics/b2World.h" />
 		<Unit filename="include/Box2D/Dynamics/b2WorldCallbacks.cpp" />
 		<Unit filename="include/Box2D/Dynamics/b2WorldCallbacks.h" />
-		<Unit filename="include/gameWorld.hpp" />
 		<Unit filename="include/main.hpp" />
+		<Unit filename="include/nodachi2D.hpp" />
 		<Unit filename="include/objects/animation.hpp" />
 		<Unit filename="include/objects/gameObjectManager.hpp" />
 		<Unit filename="include/objects/material.hpp" />
 		<Unit filename="include/objects/spacialObject.hpp" />
 		<Unit filename="include/objects/visualAppearance.hpp" />
-		<Unit filename="src/gameWorld.cpp" />
 		<Unit filename="src/main.cpp" />
+		<Unit filename="src/nodachi2D.cpp" />
 		<Unit filename="src/objects/animation.cpp" />
 		<Unit filename="src/objects/gameObjectManager.cpp" />
 		<Unit filename="src/objects/material.cpp" />
