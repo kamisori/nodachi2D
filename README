@@ -1,8 +1,6 @@
 This is a 2d jump and run game engine. It should be possible to also create a 2d space game and even a 2d eagles eye game,
 with minor modifications to the initialisation of box2d.
 
-
-
 It is neccessary to get Box2D and SFML and install/setup those according to the following instructions:
 
 
@@ -50,7 +48,3 @@ If i remember correctly, the libsfml-*.so must go into /usr/lib, while building 
 
 windows:
 no idea. try getting the binaries, and probably put it into the project root folder and into the bin/debug and bin/release folders.
-
-TODO:
-
-main.cpp needs to be cleaned.
