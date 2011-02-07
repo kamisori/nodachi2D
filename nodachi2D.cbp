@@ -127,6 +127,8 @@
 		<Unit filename="include/Box2D/Dynamics/b2World.h" />
 		<Unit filename="include/Box2D/Dynamics/b2WorldCallbacks.cpp" />
 		<Unit filename="include/Box2D/Dynamics/b2WorldCallbacks.h" />
+		<Unit filename="include/contactListener.hpp" />
+		<Unit filename="include/inputHandler.hpp" />
 		<Unit filename="include/main.hpp" />
 		<Unit filename="include/nodachi2D.hpp" />
 		<Unit filename="include/objects/animation.hpp" />
@@ -134,6 +136,8 @@
 		<Unit filename="include/objects/material.hpp" />
 		<Unit filename="include/objects/spacialObject.hpp" />
 		<Unit filename="include/objects/visualAppearance.hpp" />
+		<Unit filename="src/contactListener.cpp" />
+		<Unit filename="src/inputHandler.cpp" />
 		<Unit filename="src/main.cpp" />
 		<Unit filename="src/nodachi2D.cpp" />
 		<Unit filename="src/objects/animation.cpp" />

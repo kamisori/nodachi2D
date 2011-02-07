@@ -20,7 +20,7 @@ block_concrete04;wall_concrete;-0.8;15.0;
 block_concrete05;wall_concrete;1.9;18.0;
 block_concrete06;wall_concrete;-0.8;21.0;
 block_concrete07;wall_concrete;1.9;24.0;
-player;player;0.0;32.0;
+player;player;0.0;40.0;
 block_concrete08;wall_concrete;-8.0;0.0;
 block_concrete09;wall_concrete;-7.0;0.0;
 block_concrete10;wall_concrete;-6.0;0.0;

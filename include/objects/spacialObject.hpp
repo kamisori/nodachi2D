@@ -8,16 +8,22 @@
 
 namespace objects
 {
+    const uint32 sizeOfcontactIDlist = 16;
     class SpacialObject
     {
     	public:
 //            setB2Body();
+
+
             float getAngleOffsetForAnimation();
             void setAngleOffsetForAnimation(float tmp);
             std::string getSpacialObjectId();
             b2Body* getB2Body();
             VisualAppearance* getVisualAppearance();
+            void setBottomObject( SpacialObject* bottomObject );
+            void removeBottomObject( SpacialObject* bottomObject );
             bool standsOnSomething();
+            void iJumped();
 
             SpacialObject( std::string spacialObjectId, std::string materialId, b2Vec2 position );
                             /*string* audialAppearanceId,*/ /*float objectHealth,*/ /*float objectHardness*/
@@ -25,6 +31,7 @@ namespace objects
     	protected:
 
     	private:
+            std::string bottom[sizeOfcontactIDlist];
 
             sf::Vector2f moveObject( sf::Vector2f addThis );
             std::string       spacialObjectId_;

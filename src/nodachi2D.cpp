@@ -4,48 +4,17 @@
 #include <objects/gameObjectManager.hpp>
 #include <nodachi2D.hpp>
 #include <Box2D/Box2D.h>
-
-InputHandler::InputHandler(sf::RenderWindow* appWindow, sf::Mutex* GlobalMutex)
-{
-    keyInput_ = &appWindow->GetInput();
-    GlobalMutex_ = GlobalMutex;
-
-    globalflags_.Running = true;
-
-    globalflags_.ApplyForceUpwardToPlayer = false;
-    globalflags_.ApplyForceLeftToPlayer = false;
-    globalflags_.ApplyForceRightToPlayer = false;
-    globalflags_.ApplyForceDownwardToPlayer = false;
-    globalflags_.Restart = false;
-
-    Launch();
-}
-InputHandler::~InputHandler()
-{
-    Terminate();
-}
-
-void InputHandler::Run()
-{
-    while( globalflags_.Running )
-    {
-        GlobalMutex_->Lock();
-        globalflags_.ApplyForceLeftToPlayer = keyInput_->IsKeyDown(sf::Key::Left);
-        globalflags_.ApplyForceRightToPlayer = keyInput_->IsKeyDown(sf::Key::Right);
-        globalflags_.ApplyForceDownwardToPlayer = keyInput_->IsKeyDown(sf::Key::Down);
-        globalflags_.ApplyForceUpwardToPlayer = keyInput_->IsKeyDown(sf::Key::Up);
-        GlobalMutex_->Unlock();
-    }
-}
+#include <inputHandler.hpp>
 
 void nodachi2D::intitializeRenderContext()
 {
     resolution_.x = 800;
     resolution_.y = 600;
+    resolutionColor_ = 32;
 
     ViewRect_ = sf::FloatRect(0, 0, resolution_.x, resolution_.y);
     twoDCam_ = sf::View(ViewRect_);
-    appWindow_ = new sf::RenderWindow(sf::VideoMode(resolution_.x, resolution_.y, 32), "nodachi2D");
+    appWindow_ = new sf::RenderWindow(sf::VideoMode(resolution_.x, resolution_.y, resolutionColor_), "nodachi2D");
     appWindow_->UseVerticalSync(true);
     appWindow_->SetView(twoDCam_);
 
@@ -64,10 +33,11 @@ void nodachi2D::initializeThreads()
 
 void nodachi2D::initializePhysics()
 {
+    this->contactListener_ = new ContactListener();
     this->globalGameObjectManager_ = new objects::GameObjectManager();
-    b2Vec2 gravity(0.0,-9.8);
     bool doSleep = true;
-    this->simulatedWorld_ = new b2World(gravity, doSleep);
+    this->simulatedWorld_ = new b2World(EarthGravity, doSleep);
+    this->simulatedWorld_->SetContactListener(contactListener_);
 }
 
 void nodachi2D::loadLevel()
@@ -116,16 +86,18 @@ void nodachi2D::handleInputEvents(objects::SpacialObject* tmpObject)
     b2Vec2 linearVelocity = tmpB2Body->GetLinearVelocity();
     b2Vec2 tmpForce;
 
-    tmpForce.x = 0.0;
-    tmpForce.y = 0.0;
+    tmpForce.x = Fnull;
+    tmpForce.y = Fnull;
     GlobalMutex_->Lock();
-    if( inputHandlerThread_->globalflags_.ApplyForceUpwardToPlayer && standing && (Clock_.GetElapsedTime() >= 0.25))
+    if( standing && inputHandlerThread_->globalflags_.ApplyForceUpwardToPlayer && (Clock_.GetElapsedTime() >= 0.125))
     {
         //tmpForce.y = 50.0 * cos(angle);
         //tmpForce.x = 50.0 * sin(angle);
-        tmpForce.y = 500.0;
+        tmpForce.y = jumpForce;
+        tmpForce.x = Fnull;
 
         tmpB2Body->ApplyForce( tmpForce, position );
+        tmpObject->iJumped();
         inputHandlerThread_->globalflags_.ApplyForceUpwardToPlayer = false;
         Clock_.Reset();
     }
@@ -133,28 +105,31 @@ void nodachi2D::handleInputEvents(objects::SpacialObject* tmpObject)
     {
         //tmpForce.y = -50.0 * cos(angle);
         //tmpForce.x = -50.0 * sin(angle);
-        tmpForce.y = -30.0;
+        tmpForce.y = -1 * fallForce;
+        tmpForce.x = Fnull;
         tmpB2Body->ApplyForce( tmpForce, position );
     }
     if(inputHandlerThread_->globalflags_.ApplyForceLeftToPlayer)
     {
-        if( linearVelocity.x > -10.0 )
+        tmpForce.y = Fnull;
+        if( linearVelocity.x > (-1 * horizontalSpeedLimit) )
         {
             if(standing)
-                tmpForce.x = -30.0;
+                tmpForce.x = -1 * horizontalForce;
             else
-                tmpForce.x = -10.0;
+                tmpForce.x = -1 * horizontalForceMidAir;
             tmpB2Body->ApplyForce( tmpForce, position);
         }
     }
     if(inputHandlerThread_->globalflags_.ApplyForceRightToPlayer)
     {
-        if( linearVelocity.x < 10.0 )
+        tmpForce.y = Fnull;
+        if( linearVelocity.x < horizontalSpeedLimit )
         {
             if(standing)
-                tmpForce.x = 30.0;
+                tmpForce.x = horizontalForce;
             else
-                tmpForce.x = 10.0;
+                tmpForce.x = horizontalForceMidAir;
             tmpB2Body->ApplyForce( tmpForce, position);
         }
     }
@@ -177,14 +152,14 @@ void nodachi2D::displayNextScene()
             b2Vec2 position = tmpB2Body->GetPosition();
             float32 angle = tmpB2Body->GetAngle();
 
-            std::string object = tmpObject->getSpacialObjectId();
+            std::string objectID = tmpObject->getSpacialObjectId();
 
 
-            if( object.compare( "player" ) == 0 ){
+            if( objectID.compare( "player" ) == 0 ){
 
                 sf::Vector2f tmpPos;
-                tmpPos.x = (position.x*32);
-                tmpPos.y = -(position.y*32);
+                tmpPos.x = (position.x*physicsVisualsRatio);
+                tmpPos.y = -(position.y*physicsVisualsRatio);
 
                 twoDCam_.SetCenter(tmpPos);
                 appWindow_->SetView(twoDCam_);
@@ -195,8 +170,9 @@ void nodachi2D::displayNextScene()
             objects::Animation* tmpAnim = tmpObject->getVisualAppearance()->getCurrentAnimation();
             sf::Sprite* tmpSprite = tmpAnim->getNextFrame();
 
-            tmpSprite->SetPosition( (position.x*32) , -(position.y*32) );
-            tmpSprite->SetRotation( (angle + tmpObject->getAngleOffsetForAnimation()) *(180/3.1415f) );
+            tmpSprite->Scale(spritesScale);
+            tmpSprite->SetPosition( (position.x*physicsVisualsRatio) , -(position.y*physicsVisualsRatio) );
+            tmpSprite->SetRotation( (angle + tmpObject->getAngleOffsetForAnimation()) *(180/3.14159265f) );
             appWindow_->Draw( (*tmpSprite) );
 
             i++;

@@ -7,8 +7,73 @@
 #include <Box2D/Box2D.h>
 #include <Box2D/Dynamics/Contacts/b2Contact.h>
 
+#include <iostream>
+
 namespace objects
 {
+    void SpacialObject::setBottomObject( SpacialObject* bottomObject )
+    {
+        std::cout << this->getSpacialObjectId() << ": ";
+        for(uint32 i = 0; i < objects::sizeOfcontactIDlist; i++)
+        {
+            std::cout << bottom[i] << " ";
+            if(this->bottom[i].empty())
+            {
+                this->bottom[i] = bottomObject->getSpacialObjectId();
+                std::cout << "  ++  " << bottom[i] << std::endl;
+                return;
+            }
+        }
+        std::cout << std::endl;
+    }
+
+    void SpacialObject::removeBottomObject( SpacialObject* bottomObject )
+    {
+        std::string bottomID = bottomObject->getSpacialObjectId();
+        std::cout << this->getSpacialObjectId() << ": ";
+        for(uint32 i = 0; i < objects::sizeOfcontactIDlist; i++)
+        {
+            std::cout << bottom[i] << " ";
+            if(this->bottom[i].compare(bottomID) == 0)
+            {
+                std::cout << "  --  " << bottom[i] << std::endl;
+                this->bottom[i].clear();
+                return;
+            }
+        }
+        std::cout << std::endl;
+    }
+
+    void SpacialObject::iJumped()
+    {
+        for(uint32 i = 0; i<objects::sizeOfcontactIDlist;i++)
+        {
+            this->bottom[i].clear();
+        }
+    }
+
+    bool SpacialObject::standsOnSomething()
+    {
+        uint32 tmp = 0;
+
+        for(uint32 i = 0; i<objects::sizeOfcontactIDlist;i++)
+        {
+            if(!this->bottom[i].empty())
+            {
+                tmp += 1;
+            }
+        }
+
+        if(tmp == 0)
+        {
+            return false;
+        }
+        else
+        {
+            return true;
+        }
+    }
+
     float SpacialObject::getAngleOffsetForAnimation()
     {
         return angleOffsetForAnimation_;
@@ -32,35 +97,6 @@ namespace objects
     VisualAppearance* SpacialObject::getVisualAppearance()
     {
         return visualAppearance_;
-    }
-
-    bool SpacialObject::standsOnSomething()
-    {
-        b2Body* thisB2Body = this->getB2Body();
-        float32 thisB2BodyYPos= thisB2Body->GetPosition().y;
-        for( b2ContactEdge* contactEdge = thisB2Body->GetContactList();
-             contactEdge; contactEdge = contactEdge->next )
-        {
-            if( thisB2BodyYPos > contactEdge->other->GetPosition().y )
-            {
-                b2Manifold* contactManifold = contactEdge->contact->GetManifold();
-                if( contactManifold->pointCount == 2 )
-                {
-                    if( contactManifold->points[0].localPoint.x !=  contactManifold->points[1].localPoint.x )
-                    {
-                        return true;
-                    }
-                }
-                else if( contactManifold->pointCount == 1 )
-                {
-                    if( contactManifold->points[0].localPoint.y < ( thisB2BodyYPos - 0.5 ) )
-                    {
-                        return true;
-                    }
-                }
-            }
-        }
-        return false;
     }
 
     SpacialObject::SpacialObject( std::string spacialObjectId, std::string materialId, b2Vec2 position )
