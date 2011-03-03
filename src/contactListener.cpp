@@ -33,42 +33,52 @@ void ContactListener::BeginContact(b2Contact* contact)
             face = IDb;
         }
 
+        if( IDa.compare( face ) == 0 &&
+            IDa.compare("player") == 0 &&
+            bodyA->GetPosition().y > bodyB->GetPosition().y &&
+            ( ( bodyA->GetPosition().y - bodyB->GetPosition().y ) > 0.984375 ) /*&&
+            bodyA->GetPosition().y > bodyA->GetWorldPoint(contactsManifold->localPoint).y */)
 
-        if( ( bodyB->GetPosition().y - bodyA->GetPosition().y ) > 0.375 )
         {
-            std::cout << IDb <<" is higher than " << IDa << ". " << face << " " << contactsManifold->localPoint.y <<std::endl;
+            actorA->setBottomObject(actorB);
+            std::cout << IDa <<" is on top of " << IDb << ". " << face << " a" <<std::endl;
         }
-        else if( ( bodyA->GetPosition().y - bodyB->GetPosition().y ) > 0.375 )
+        else if(    IDb.compare( face ) == 0 &&
+                    IDb.compare("player") == 0 &&
+                    bodyB->GetPosition().y > bodyA->GetPosition().y &&
+                    ( ( bodyB->GetPosition().y - bodyA->GetPosition().y ) > 0.984375 )/* &&
+                    bodyB->GetPosition().y > bodyB->GetWorldPoint(contactsManifold->localPoint).y */)
         {
-            std::cout << IDa <<" is higher than " << IDb << ". " << face << " " << contactsManifold->localPoint.y <<std::endl;
+            actorB->setBottomObject(actorA);
+            std::cout << IDb <<" is on top of " << IDa << ". " << face << " b" <<std::endl;
+        }
+        else if( IDb.compare( face ) == 0 &&
+            IDa.compare("player") == 0 &&
+            bodyA->GetPosition().y > bodyB->GetPosition().y &&
+            ( ( bodyA->GetPosition().y - bodyB->GetPosition().y ) > 0.984375 ) /*&&
+            bodyA->GetPosition().y > bodyA->GetWorldPoint(contactsManifold->localPoint).y */)
+
+        {
+            actorA->setBottomObject(actorB);
+            std::cout << IDa <<" is on top of " << IDb << ". " << face << " a" <<std::endl;
+        }
+        else if(    IDa.compare( face ) == 0 &&
+                    IDb.compare("player") == 0 &&
+                    bodyB->GetPosition().y > bodyA->GetPosition().y &&
+                    ( ( bodyB->GetPosition().y - bodyA->GetPosition().y ) > 0.984375 )/* &&
+                    bodyB->GetPosition().y > bodyB->GetWorldPoint(contactsManifold->localPoint).y */)
+        {
+            actorB->setBottomObject(actorA);
+            std::cout << IDb <<" is on top of " << IDa << ". " << face << " b" <<std::endl;
         }
         else
         {
-            std::cout << IDa << " and " << IDb << " are equaly high. " << face << " " << contactsManifold->localPoint.y <<std::endl;
+            std::cout << IDa << " and " << IDb << " are equaly high. " << face <<std::endl;
         }
 
-        if( contactsManifold->type == b2Manifold::e_faceA )
-        {
-            if( bodyA->GetWorldPoint(contactsManifold->localPoint).y < bodyA->GetPosition().y  && IDa.compare("player") == 0 )
-            {
-                actorA->setBottomObject(actorB);
-            }
-            else if( bodyA->GetWorldPoint(contactsManifold->localPoint).y > bodyA->GetPosition().y  && IDb.compare("player") == 0 )
-            {
-                actorB->setBottomObject(actorA);
-            }
-        }
-        else if( contactsManifold->type == b2Manifold::e_faceB )
-        {
-            if( bodyB->GetWorldPoint(contactsManifold->localPoint).y < bodyB->GetPosition().y  && IDb.compare("player") == 0 )
-            {
-                actorB->setBottomObject(actorA);
-            }
-            else if( bodyB->GetWorldPoint(contactsManifold->localPoint).y > bodyB->GetPosition().y  && IDa.compare("player") == 0 )
-            {
-                actorA->setBottomObject(actorB);
-            }
-        }
+std::cout << "a "  << bodyA->GetPosition().y << " " << bodyA->GetWorldPoint(contactsManifold->localPoint).y <<std::endl;
+std::cout << "b "  << bodyB->GetPosition().y << " " << bodyB->GetWorldPoint(contactsManifold->localPoint).y <<std::endl;
+
     }
     return;
 }
@@ -83,36 +93,63 @@ void ContactListener::EndContact(b2Contact* contact)
     b2Body* bodyB = fixtureB->GetBody();
     objects::SpacialObject* actorB = (objects::SpacialObject*)bodyB->GetUserData();
 
-    b2Manifold* contactsManifold = contact->GetManifold();
-
-
     std::string IDa = actorA->getSpacialObjectId();
     std::string IDb = actorB->getSpacialObjectId();
 
     if( IDa.compare("player") == 0 || IDb.compare("player") == 0 )
     {
+        b2Manifold* contactsManifold = contact->GetManifold();
+        std::string face;
         if( contactsManifold->type == b2Manifold::e_faceA )
         {
-            if( bodyA->GetWorldPoint(contactsManifold->localPoint).y < bodyA->GetPosition().y  && IDa.compare("player") == 0 )
-            {
-                actorA->removeBottomObject(actorB);
-            }
-            else if( bodyA->GetWorldPoint(contactsManifold->localPoint).y > bodyA->GetPosition().y  && IDb.compare("player") == 0 )
-            {
-                actorB->removeBottomObject(actorA);
-            }
+            face = IDa;
         }
         else if( contactsManifold->type == b2Manifold::e_faceB )
         {
-            if( bodyB->GetWorldPoint(contactsManifold->localPoint).y < bodyB->GetPosition().y  && IDb.compare("player") == 0 )
-            {
-                actorB->removeBottomObject(actorA);
-            }
-            else if( bodyB->GetWorldPoint(contactsManifold->localPoint).y > bodyB->GetPosition().y  && IDa.compare("player") == 0 )
-            {
-                actorA->removeBottomObject(actorB);
-            }
+            face = IDb;
         }
+
+        if( IDa.compare( face ) == 0 &&
+            IDa.compare("player") == 0 &&
+            bodyA->GetPosition().y > bodyB->GetPosition().y &&
+            ( ( bodyA->GetPosition().y - bodyB->GetPosition().y ) > 0.984375 ) /*&&
+            bodyA->GetPosition().y > bodyA->GetWorldPoint(contactsManifold->localPoint).y */)
+
+        {
+            actorA->removeBottomObject(actorB);
+            std::cout << IDa <<" is no longer on top of " << IDb << ". " << face << " a" <<std::endl;
+        }
+        else if(    IDb.compare( face ) == 0 &&
+                    IDb.compare("player") == 0 &&
+                    bodyB->GetPosition().y > bodyA->GetPosition().y &&
+                    ( ( bodyB->GetPosition().y - bodyA->GetPosition().y ) > 0.984375 )/* &&
+                    bodyB->GetPosition().y > bodyB->GetWorldPoint(contactsManifold->localPoint).y */)
+        {
+            actorB->removeBottomObject(actorA);
+            std::cout << IDb <<" is no longer on top of " << IDa << ". " << face << " b" <<std::endl;
+        }
+        else if( IDb.compare( face ) == 0 &&
+            IDa.compare("player") == 0 &&
+            bodyA->GetPosition().y > bodyB->GetPosition().y &&
+            ( ( bodyA->GetPosition().y - bodyB->GetPosition().y ) > 0.984375 ) /*&&
+            bodyA->GetPosition().y > bodyA->GetWorldPoint(contactsManifold->localPoint).y */)
+
+        {
+            actorA->removeBottomObject(actorB);
+            std::cout << IDa <<" is no longer on top of " << IDb << ". " << face << " a" <<std::endl;
+        }
+        else if(    IDa.compare( face ) == 0 &&
+                    IDb.compare("player") == 0 &&
+                    bodyB->GetPosition().y > bodyA->GetPosition().y &&
+                    ( ( bodyB->GetPosition().y - bodyA->GetPosition().y ) > 0.984375 )/* &&
+                    bodyB->GetPosition().y > bodyB->GetWorldPoint(contactsManifold->localPoint).y */)
+        {
+            actorB->removeBottomObject(actorA);
+            std::cout << IDb <<" is no longer on top of " << IDa << ". " << face << " b" <<std::endl;
+        }
+std::cout << "--a "  << bodyA->GetPosition().y << " " << bodyA->GetWorldPoint(contactsManifold->localPoint).y <<std::endl;
+std::cout << "--b "  << bodyB->GetPosition().y << " " << bodyB->GetWorldPoint(contactsManifold->localPoint).y <<std::endl;
+
     }
     return;
 }

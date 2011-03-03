@@ -5,11 +5,12 @@
 #include <nodachi2D.hpp>
 #include <Box2D/Box2D.h>
 #include <inputHandler.hpp>
+#include <iostream>
 
 void nodachi2D::intitializeRenderContext()
 {
-    resolution_.x = 800;
-    resolution_.y = 600;
+    resolution_.x = 1024;
+    resolution_.y = 768;
     resolutionColor_ = 32;
 
     ViewRect_ = sf::FloatRect(0, 0, resolution_.x, resolution_.y);
@@ -89,7 +90,7 @@ void nodachi2D::handleInputEvents(objects::SpacialObject* tmpObject)
     tmpForce.x = Fnull;
     tmpForce.y = Fnull;
     GlobalMutex_->Lock();
-    if( standing && inputHandlerThread_->globalflags_.ApplyForceUpwardToPlayer && (Clock_.GetElapsedTime() >= 0.125))
+    if( standing && inputHandlerThread_->globalflags_.ApplyForceUpwardToPlayer && (Clock_.GetElapsedTime() >= 0.5))
     {
         //tmpForce.y = 50.0 * cos(angle);
         //tmpForce.x = 50.0 * sin(angle);
@@ -144,42 +145,61 @@ void nodachi2D::calculateNextScene()
 
 void nodachi2D::displayNextScene()
 {
-     int i = 0;
-        objects::SpacialObject* tmpObject = globalGameObjectManager_->nextSpacialObject( i );
-        while( tmpObject != NULL )
-        {
-            b2Body* tmpB2Body = tmpObject->getB2Body();
-            b2Vec2 position = tmpB2Body->GetPosition();
-            float32 angle = tmpB2Body->GetAngle();
+    bool isOnFloor;
+    sf::String onFloor("On Floor");
+    sf::Shape BGRect = sf::Shape::Rectangle(0.0,0.0,250.0,80.0,sf::Color::Black);
 
-            std::string objectID = tmpObject->getSpacialObjectId();
+    onFloor.SetScale(2.0,2.0);
+    onFloor.SetColor(sf::Color::Green);
+    int i = 0;
+
+    objects::SpacialObject* tmpObject = globalGameObjectManager_->nextSpacialObject( i );
+    while( tmpObject != NULL )
+    {
+        b2Body* tmpB2Body = tmpObject->getB2Body();
+        b2Vec2 position = tmpB2Body->GetPosition();
+        float32 angle = tmpB2Body->GetAngle();
+
+        std::string objectID = tmpObject->getSpacialObjectId();
+
+        objects::Animation* tmpAnim = tmpObject->getVisualAppearance()->getCurrentAnimation();
+        sf::Sprite* tmpSprite = tmpAnim->getNextFrame();
 
 
-            if( objectID.compare( "player" ) == 0 ){
+        if( objectID.compare( "player" ) == 0 ){
 
-                sf::Vector2f tmpPos;
-                tmpPos.x = (position.x*physicsVisualsRatio);
-                tmpPos.y = -(position.y*physicsVisualsRatio);
+            sf::Vector2f tmpPos;
+            tmpPos.x = (position.x*physicsVisualsRatio);
+            tmpPos.y = -(position.y*physicsVisualsRatio);
 
-                twoDCam_.SetCenter(tmpPos);
-                appWindow_->SetView(twoDCam_);
+            twoDCam_.SetCenter(tmpPos);
+            appWindow_->SetView(twoDCam_);
 
-                handleInputEvents(tmpObject);
+            if(tmpObject->standsOnSomething())
+            {
+                isOnFloor = true;
+                BGRect.SetPosition( tmpPos.x+280, tmpPos.y+320);
+                onFloor.SetPosition( tmpPos.x+280, tmpPos.y+320);
             }
 
-            objects::Animation* tmpAnim = tmpObject->getVisualAppearance()->getCurrentAnimation();
-            sf::Sprite* tmpSprite = tmpAnim->getNextFrame();
-
-            tmpSprite->Scale(spritesScale);
-            tmpSprite->SetPosition( (position.x*physicsVisualsRatio) , -(position.y*physicsVisualsRatio) );
-            tmpSprite->SetRotation( (angle + tmpObject->getAngleOffsetForAnimation()) *(180/3.14159265f) );
-            appWindow_->Draw( (*tmpSprite) );
-
-            i++;
-            tmpObject = globalGameObjectManager_->nextSpacialObject( i );
+            handleInputEvents(tmpObject);
         }
-        appWindow_->Display();
-        appWindow_->Clear();
+
+        tmpSprite->Scale(spritesScale);
+        tmpSprite->SetPosition( (position.x*physicsVisualsRatio) , -(position.y*physicsVisualsRatio) );
+        tmpSprite->SetRotation( (angle + tmpObject->getAngleOffsetForAnimation()) *(180/3.14159265f) );
+        appWindow_->Draw( (*tmpSprite) );
+
+        i++;
+        tmpObject = globalGameObjectManager_->nextSpacialObject( i );
+    }
+    if(isOnFloor)
+    {
+        appWindow_->Draw(BGRect);
+        appWindow_->Draw(onFloor);
+    }
+    appWindow_->Display();
+    appWindow_->Clear();
 }
 
 void nodachi2D::runNodachi2D()

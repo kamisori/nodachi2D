@@ -14,15 +14,15 @@ const float32 timeStep = 1.0f / 60.0f;
 const int32 velocityIterations = 6;
 const int32 positionIterations = 2;
 
-const int32 physicsVisualsRatio = 32;
+const int32 physicsVisualsRatio = 64;
 //dont change the scale, it wont work
 const sf::Vector2f spritesScale(1.0, 1.0);
 
-const float32 jumpForce = 500.0;
-const float32 fallForce = 30.0;
-const float32 horizontalForce = 30.0;
-const float32 horizontalForceMidAir = 10.0;
-const float32 horizontalSpeedLimit = 20.0;
+const float32 jumpForce = 400.0;
+const float32 fallForce = 15.0;
+const float32 horizontalForce = 15.0;
+const float32 horizontalForceMidAir = 5.0;
+const float32 horizontalSpeedLimit = 10.0;
 
 const float32 Fnull = 0.0;
 

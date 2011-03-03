@@ -1,4 +1,5 @@
 #include <string>
+#include <vector>
 #include <SFML/System.hpp>
 #include <objects/visualAppearance.hpp>
 #include <objects/spacialObject.hpp>
@@ -13,65 +14,28 @@ namespace objects
 {
     void SpacialObject::setBottomObject( SpacialObject* bottomObject )
     {
-        std::cout << this->getSpacialObjectId() << ": ";
-        for(uint32 i = 0; i < objects::sizeOfcontactIDlist; i++)
-        {
-            std::cout << bottom[i] << " ";
-            if(this->bottom[i].empty())
-            {
-                this->bottom[i] = bottomObject->getSpacialObjectId();
-                std::cout << "  ++  " << bottom[i] << std::endl;
-                return;
-            }
-        }
-        std::cout << std::endl;
+        this->bottom.push_back( bottomObject->getSpacialObjectId() );
     }
 
     void SpacialObject::removeBottomObject( SpacialObject* bottomObject )
     {
-        std::string bottomID = bottomObject->getSpacialObjectId();
-        std::cout << this->getSpacialObjectId() << ": ";
-        for(uint32 i = 0; i < objects::sizeOfcontactIDlist; i++)
+        for(std::vector<std::string>::iterator it = this->bottom.begin(); it < this->bottom.end(); it++ )
         {
-            std::cout << bottom[i] << " ";
-            if(this->bottom[i].compare(bottomID) == 0)
+            if(it->compare(bottomObject->getSpacialObjectId()) == 0)
             {
-                std::cout << "  --  " << bottom[i] << std::endl;
-                this->bottom[i].clear();
-                return;
+                this->bottom.erase(it);
             }
         }
-        std::cout << std::endl;
     }
 
     void SpacialObject::iJumped()
     {
-        for(uint32 i = 0; i<objects::sizeOfcontactIDlist;i++)
-        {
-            this->bottom[i].clear();
-        }
+        this->bottom.clear();
     }
 
     bool SpacialObject::standsOnSomething()
     {
-        uint32 tmp = 0;
-
-        for(uint32 i = 0; i<objects::sizeOfcontactIDlist;i++)
-        {
-            if(!this->bottom[i].empty())
-            {
-                tmp += 1;
-            }
-        }
-
-        if(tmp == 0)
-        {
-            return false;
-        }
-        else
-        {
-            return true;
-        }
+        return !(this->bottom.empty());
     }
 
     float SpacialObject::getAngleOffsetForAnimation()

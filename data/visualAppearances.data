@@ -1,2 +1,5 @@
 crate_wood;data/crate_wood.AnimationDescription;
 block_concrete;data/block_concrete.AnimationDescription;
+wall_h_concrete;data/wall_h_concrete.AnimationDescription;
+wall_v_concrete;data/wall_v_concrete.AnimationDescription;
+figur;data/figur.AnimationDescription;
