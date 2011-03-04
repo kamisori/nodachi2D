@@ -21,7 +21,7 @@ const sf::Vector2f spritesScale(1.0, 1.0);
 const float32 jumpForce = 400.0;
 const float32 fallForce = 15.0;
 const float32 horizontalForce = 15.0;
-const float32 horizontalForceMidAir = 5.0;
+const float32 horizontalForceMidAir = 10.0;
 const float32 horizontalSpeedLimit = 10.0;
 
 const float32 Fnull = 0.0;

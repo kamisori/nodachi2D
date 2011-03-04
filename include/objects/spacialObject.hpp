@@ -32,7 +32,6 @@ namespace objects
 
     	private:
             std::vector< std::string > bottom;
-            //std::string bottom[sizeOfcontactIDlist];
 
             sf::Vector2f moveObject( sf::Vector2f addThis );
             std::string       spacialObjectId_;
