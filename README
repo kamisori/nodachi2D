@@ -41,10 +41,12 @@ CMakeLists.txt
 
                                         SFML
                                         ----
+for developement i use 1.6, want to patch it to work with 2, not sure if it works with 1.7
 
 posix:
-you need to build it from source, and use --prefix=/usr i think. at least i had some problems when i set it up months ago.
+you (might) need to build it from source, and use --prefix=/usr i think. at least i had some problems when i set it up months ago.
 If i remember correctly, the libsfml-*.so must go into /usr/lib, while building from source puts it into /usr/local/lib.
+maybe it works with a precompiled bin from your package manager
 
 windows:
 no idea. try getting the binaries, and probably put it into the project root folder and into the bin/debug and bin/release folders.
