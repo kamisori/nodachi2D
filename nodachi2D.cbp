@@ -130,6 +130,7 @@
 		<Unit filename="include/contactListener.hpp" />
 		<Unit filename="include/inputHandler.hpp" />
 		<Unit filename="include/main.hpp" />
+		<Unit filename="include/networkHandler.hpp" />
 		<Unit filename="include/nodachi2D.hpp" />
 		<Unit filename="include/objects/animation.hpp" />
 		<Unit filename="include/objects/gameObjectManager.hpp" />
@@ -139,6 +140,7 @@
 		<Unit filename="src/contactListener.cpp" />
 		<Unit filename="src/inputHandler.cpp" />
 		<Unit filename="src/main.cpp" />
+		<Unit filename="src/networkHandler.cpp" />
 		<Unit filename="src/nodachi2D.cpp" />
 		<Unit filename="src/objects/animation.cpp" />
 		<Unit filename="src/objects/gameObjectManager.cpp" />
