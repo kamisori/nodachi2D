@@ -1,3 +1,21 @@
+/*
+    nodachi2D is a client application for the gameserver heikiko2D.
+    Copyright (C) 2010-2011  Paul Predkiewicz
+
+    nodachi2D is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 #include <string>
 #include <vector>
 #include <map>
@@ -6,6 +24,36 @@
 #include <Box2D/Box2D.h>
 #include <inputHandler.hpp>
 #include <iostream>
+#include <toolBox.hpp>
+
+nodachi2D::nodachi2D()
+{
+    initializePhysics();
+    loadLevel();
+
+    intitializeRenderContext();
+    initializeThreads();
+}
+
+void nodachi2D::initializePhysics()
+{
+    this->contactListener_ = new ContactListener();
+    this->globalGameObjectManager_ = new objects::GameObjectManager();
+    bool doSleep = true;
+    this->simulatedWorld_ = new b2World(EarthGravity, doSleep);
+    this->simulatedWorld_->SetContactListener(contactListener_);
+}
+
+void nodachi2D::loadLevel()
+{
+    std::string visualAppearancesFile ( "data/visualAppearances.data" );
+    std::string materialFile ( "data/materials.data" );
+    std::string objectFile ( "data/spacialObjects.data" );
+
+    this->globalGameObjectManager_->loadVisualAppearances( visualAppearancesFile );
+    this->globalGameObjectManager_->loadMaterials( materialFile );
+    this->globalGameObjectManager_->loadObjects( objectFile );
+}
 
 void nodachi2D::intitializeRenderContext()
 {
@@ -32,24 +80,16 @@ void nodachi2D::initializeThreads()
     inputHandlerThread_ = new InputHandler(appWindow_, GlobalMutex_);
 }
 
-void nodachi2D::initializePhysics()
+void nodachi2D::runNodachi2D()
 {
-    this->contactListener_ = new ContactListener();
-    this->globalGameObjectManager_ = new objects::GameObjectManager();
-    bool doSleep = true;
-    this->simulatedWorld_ = new b2World(EarthGravity, doSleep);
-    this->simulatedWorld_->SetContactListener(contactListener_);
-}
+    while (inputHandlerThread_->globalflags_.Running)
+    {
+        handleSystemEvents();
 
-void nodachi2D::loadLevel()
-{
-    std::string visualAppearancesFile ( "data/visualAppearances.data" );
-    std::string materialFile ( "data/materials.data" );
-    std::string objectFile ( "data/spacialObjects.data" );
+        calculateNextScene();
 
-    this->globalGameObjectManager_->loadVisualAppearances( visualAppearancesFile );
-    this->globalGameObjectManager_->loadMaterials( materialFile );
-    this->globalGameObjectManager_->loadObjects( objectFile );
+        displayNextScene();
+    }
 }
 
 void nodachi2D::handleSystemEvents()
@@ -57,26 +97,91 @@ void nodachi2D::handleSystemEvents()
     sf::Event Event;
     while (appWindow_->GetEvent(Event))
     {
-        // Window closed
-        if (Event.Type == sf::Event::Closed){
-            appWindow_->Close();
-            inputHandlerThread_->globalflags_.Running = false;
+        if (Event.Type == sf::Event::Closed)
+        {
+            closeWindow();
         }
-
-        // Escape key pressed
-        if ((Event.Type == sf::Event::KeyPressed)){
-            if((Event.Key.Code == sf::Key::Escape)){
-                appWindow_->Close();
-                inputHandlerThread_->globalflags_.Running = false;
-            }
-        }
-
-        if((Event.Type == sf::Event::KeyPressed)){
-            if((Event.Key.Code == sf::Key::R)){
-                inputHandlerThread_->globalflags_.Restart = true;
+        else if ((Event.Type == sf::Event::KeyPressed))
+        {
+            if((Event.Key.Code == sf::Key::Escape))
+            {
+                closeWindow();
             }
         }
     }
+}
+
+void nodachi2D::closeWindow()
+{
+    appWindow_->Close();
+    inputHandlerThread_->globalflags_.Running = false;
+}
+
+void nodachi2D::calculateNextScene()
+{
+    simulatedWorld_->Step(timeStep,velocityIterations,positionIterations);
+    simulatedWorld_->ClearForces();
+}
+
+void nodachi2D::displayNextScene()
+{
+    sf::Vector2f playerPos;
+    bool isOnFloor;
+
+    int currentSpacialObject = 0;
+
+    objects::SpacialObject* tmpObject = globalGameObjectManager_->nextSpacialObject( currentSpacialObject );
+    while( tmpObject != NULL )
+    {
+        sf::Vector2f positionOfCurrentObject;
+        b2Body* tmpB2Body = tmpObject->getB2Body();
+        positionOfCurrentObject = toolBox::b2Vec_To_sfVec_f(tmpB2Body->GetPosition(), physicsVisualsRatio, true);
+
+        if( tmpObject->getSpacialObjectId().compare( "player" ) == 0 )
+        {
+            playerPos = positionOfCurrentObject;
+
+            twoDCam_.SetCenter(playerPos);
+            appWindow_->SetView(twoDCam_);
+
+            if(tmpObject->standsOnSomething())
+            {
+                isOnFloor = true;
+            }
+
+            handleInputEvents(tmpObject);
+        }
+
+        objects::Animation* tmpAnim = tmpObject->getVisualAppearance()->getCurrentAnimation();
+        sf::Sprite* tmpSprite = tmpAnim->getNextFrame();
+
+        tmpSprite->Scale(spritesScale);
+        tmpSprite->SetPosition( positionOfCurrentObject );
+        tmpSprite->SetRotation( (tmpB2Body->GetAngle() + tmpObject->getAngleOffsetForAnimation()) *(180/3.14159265f) );
+
+        appWindow_->Draw( (*tmpSprite) );
+
+        currentSpacialObject++;
+        tmpObject = globalGameObjectManager_->nextSpacialObject( currentSpacialObject );
+    }
+
+    if(isOnFloor)
+    {
+        sf::String onFloor("On Floor");
+        sf::Shape BGRect = sf::Shape::Rectangle(0.0,0.0,250.0,80.0,sf::Color::Black);
+
+        onFloor.SetScale(2.0,2.0);
+        onFloor.SetColor(sf::Color::Green);
+
+        BGRect.SetPosition( playerPos.x+280, playerPos.y+320);
+        onFloor.SetPosition( playerPos.x+280, playerPos.y+320);
+
+        appWindow_->Draw(BGRect);
+        appWindow_->Draw(onFloor);
+    }
+
+    appWindow_->Display();
+    appWindow_->Clear();
 }
 
 void nodachi2D::handleInputEvents(objects::SpacialObject* tmpObject)
@@ -135,93 +240,6 @@ void nodachi2D::handleInputEvents(objects::SpacialObject* tmpObject)
         }
     }
     GlobalMutex_->Unlock();
-}
-
-void nodachi2D::calculateNextScene()
-{
-    simulatedWorld_->Step(timeStep,velocityIterations,positionIterations);
-    simulatedWorld_->ClearForces();
-}
-
-void nodachi2D::displayNextScene()
-{
-    bool isOnFloor;
-    sf::String onFloor("On Floor");
-    sf::Shape BGRect = sf::Shape::Rectangle(0.0,0.0,250.0,80.0,sf::Color::Black);
-
-    onFloor.SetScale(2.0,2.0);
-    onFloor.SetColor(sf::Color::Green);
-    int i = 0;
-
-    objects::SpacialObject* tmpObject = globalGameObjectManager_->nextSpacialObject( i );
-    while( tmpObject != NULL )
-    {
-        b2Body* tmpB2Body = tmpObject->getB2Body();
-        b2Vec2 position = tmpB2Body->GetPosition();
-        float32 angle = tmpB2Body->GetAngle();
-
-        std::string objectID = tmpObject->getSpacialObjectId();
-
-        objects::Animation* tmpAnim = tmpObject->getVisualAppearance()->getCurrentAnimation();
-        sf::Sprite* tmpSprite = tmpAnim->getNextFrame();
-
-
-        if( objectID.compare( "player" ) == 0 ){
-
-            sf::Vector2f tmpPos;
-            tmpPos.x = (position.x*physicsVisualsRatio);
-            tmpPos.y = -(position.y*physicsVisualsRatio);
-
-            twoDCam_.SetCenter(tmpPos);
-            appWindow_->SetView(twoDCam_);
-
-            if(tmpObject->standsOnSomething())
-            {
-                isOnFloor = true;
-                BGRect.SetPosition( tmpPos.x+280, tmpPos.y+320);
-                onFloor.SetPosition( tmpPos.x+280, tmpPos.y+320);
-            }
-
-            handleInputEvents(tmpObject);
-        }
-
-        tmpSprite->Scale(spritesScale);
-        tmpSprite->SetPosition( (position.x*physicsVisualsRatio) , -(position.y*physicsVisualsRatio) );
-        tmpSprite->SetRotation( (angle + tmpObject->getAngleOffsetForAnimation()) *(180/3.14159265f) );
-        appWindow_->Draw( (*tmpSprite) );
-
-        i++;
-        tmpObject = globalGameObjectManager_->nextSpacialObject( i );
-    }
-    if(isOnFloor)
-    {
-        appWindow_->Draw(BGRect);
-        appWindow_->Draw(onFloor);
-    }
-    appWindow_->Display();
-    appWindow_->Clear();
-}
-
-void nodachi2D::runNodachi2D()
-{
-    while (inputHandlerThread_->globalflags_.Running)
-    {
-        handleSystemEvents();
-
-        calculateNextScene();
-
-        displayNextScene();
-    }
-}
-
-nodachi2D::nodachi2D()
-{
-    initializePhysics();
-    loadLevel();
-
-
-    intitializeRenderContext();
-    initializeThreads();
 }
 
 nodachi2D::~nodachi2D(){

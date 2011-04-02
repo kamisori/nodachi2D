@@ -2,7 +2,7 @@ This is a 2d jump and run game engine. It should be possible to also create a 2d
 with minor modifications to the initialisation of box2d.
 
 It is neccessary to get Box2D and SFML and install/setup those according to the following instructions:
-
+SFML and Box2D are both licensed under the libpng license and not my own work.
 
 
                                         Box2D
@@ -39,6 +39,7 @@ Box2D.h
 CMakeLists.txt
 
 
+
                                         SFML
                                         ----
 for developement i use 1.6, want to patch it to work with 2, not sure if it works with 1.7
@@ -50,3 +51,24 @@ maybe it works with a precompiled bin from your package manager
 
 windows:
 no idea. try getting the binaries, and probably put it into the project root folder and into the bin/debug and bin/release folders.
+
+
+
+				COPYRIGHT & LICENSE
+
+nodachi2D is a client application for the gameserver heikiko2D.
+Copyright (C) 2010-2011  Paul Predkiewicz
+
+nodachi2D is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
