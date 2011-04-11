@@ -16,34 +16,25 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef NETWORK_HANDLER_HPP
-#define NETWORK_HANDLER_HPP
+#include <toolBox.hpp>
 
-#include <iostream>
-#include <SFML/System.hpp>
-#include <SFML/Network.hpp>
-
-struct networkFlags{
-    bool Running;
-    bool Connected;
-    bool LoggedIn;
-};
-
-class NetworkHandler :public sf::Thread
+b2Vec2 toolBox::sfVec_To_b2Vec(sf::Vector2f vector2f)
 {
-    private:
-        virtual void Run();
-        bool sendMessage();
-        sf::SocketTCP client_;
-        sf::IPAddress serverIP_;
-        unsigned int serverPort_;
-        std::string userName_;
-    public:
-        sf::Mutex* GlobalMutex_;
-        networkFlags globalflags_;
-        void connect();
-        bool login();
-        NetworkHandler(sf::IPAddress remoteHost, unsigned int Port, sf::Mutex* GlobalMutex);
-        ~NetworkHandler();
-};
-#endif
+    b2Vec2 result;
+    result.x = vector2f.x;
+    result.y = vector2f.y;
+
+    return result;
+}
+
+sf::Vector2f toolBox::b2Vec_To_sfVec_f(b2Vec2 vector2, int32 ratio, bool flipHorizontaly)
+{
+    sf::Vector2f result;
+    result.x = vector2.x * ratio;
+    if(flipHorizontaly)
+        result.y = -(vector2.y * ratio);
+    else
+        result.y = vector2.y * ratio;
+
+    return result;
+}

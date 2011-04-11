@@ -16,34 +16,11 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef NETWORK_HANDLER_HPP
-#define NETWORK_HANDLER_HPP
-
-#include <iostream>
+#include <Box2D/Box2D.h>
 #include <SFML/System.hpp>
-#include <SFML/Network.hpp>
-
-struct networkFlags{
-    bool Running;
-    bool Connected;
-    bool LoggedIn;
-};
-
-class NetworkHandler :public sf::Thread
+class toolBox
 {
-    private:
-        virtual void Run();
-        bool sendMessage();
-        sf::SocketTCP client_;
-        sf::IPAddress serverIP_;
-        unsigned int serverPort_;
-        std::string userName_;
     public:
-        sf::Mutex* GlobalMutex_;
-        networkFlags globalflags_;
-        void connect();
-        bool login();
-        NetworkHandler(sf::IPAddress remoteHost, unsigned int Port, sf::Mutex* GlobalMutex);
-        ~NetworkHandler();
+    static b2Vec2 sfVec_To_b2Vec(sf::Vector2f vector2f);
+    static sf::Vector2f b2Vec_To_sfVec_f(b2Vec2 vector2, int32 ratio, bool flipHorizontaly);
 };
-#endif

@@ -23,26 +23,33 @@ NetworkHandler::NetworkHandler( sf::IPAddress remoteHost, unsigned int Port, sf:
 {
     this->serverIP_ = remoteHost;
     this->serverPort_ = Port;
+    this->userName_ = "";
     globalflags_.Running = true;
+    globalflags_.Connected = false;
     GlobalMutex_ = GlobalMutex;
 }
 
 NetworkHandler::~NetworkHandler()
 {
-
     Terminate();
 }
 
-void NetworkHandler::Connect()
+void NetworkHandler::connect()
 {
     if(client_.Connect(serverPort_, serverIP_) == sf::Socket::Done)
     {
-        globalflags_.Connected = true;
-        Launch();
+        if(login())
+        {
+            globalflags_.Connected = true;
+            Launch();
+        }
+        else
+        {
+            client_.Close();
+        }
     }
     else
     {
-        globalflags_.Connected = false;
         std::cout << "Can't connect to " << serverIP_.ToString() << " on port " << serverPort_ << ".";
     }
 }
