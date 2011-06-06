@@ -107,6 +107,11 @@ void nodachi2D::handleSystemEvents()
             {
                 closeWindow();
             }
+
+            if(Event.Key.Code == sf::Key::F12)
+            {
+                startNetwork();
+            }
         }
     }
 }
@@ -115,6 +120,29 @@ void nodachi2D::closeWindow()
 {
     appWindow_->Close();
     inputHandlerThread_->globalflags_.Running = false;
+}
+
+void nodachi2D::startNetwork()
+{
+    sf::IPAddress* remoteHost = askForHost();
+    unsigned int port = askForPort();
+    networkHandlerThread_ = new NetworkHandler(remoteHost, port, this->GlobalMutex_ );
+}
+
+sf::IPAddress* nodachi2D::askForHost()
+{
+    std::string host;
+    std::cout << "Zu welchem Server moechten sie verbinden?:" << std::endl;
+    std::cin >> host;
+    return new sf::IPAddress(host);
+}
+
+unsigned int nodachi2D::askForPort()
+{
+    unsigned int port;
+    std::cout << "Welchen Port moechten sie verwenden?:" << std::endl;
+    std::cin >> port;
+    return port;
 }
 
 void nodachi2D::calculateNextScene()

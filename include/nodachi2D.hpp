@@ -27,59 +27,68 @@
 #include <objects/gameObjectManager.hpp>
 #include <inputHandler.hpp>
 #include <contactListener.hpp>
+#include <networkHandler.hpp>
 
+//Constants for Box2D
 const float32 timeStep = 1.0f / 60.0f;
 const int32 velocityIterations = 6;
 const int32 positionIterations = 2;
+const b2Vec2 EarthGravity(0.0,-9.8);
 
+//Constants for SFML
+//Ratio to convert from/to Box2D and SFML
 const int32 physicsVisualsRatio = 64;
-//dont change the scale, it wont work
+//dont change the scale, it wont work, i dont know why.
 const sf::Vector2f spritesScale(1.0, 1.0);
 
+//Constants for the inputhandler
 const float32 jumpForce = 400.0;
 const float32 fallForce = 15.0;
 const float32 horizontalForce = 15.0;
 const float32 horizontalForceMidAir = 10.0;
 const float32 horizontalSpeedLimit = 10.0;
-
 const float32 Fnull = 0.0;
-
-const b2Vec2 EarthGravity(0.0,-9.8);
 
 class nodachi2D
 {
-    public:
-        InputHandler* inputHandlerThread_;
-        void runNodachi2D();
+public:
+    void runNodachi2D();
 
-        nodachi2D();
-        ~nodachi2D();
+    nodachi2D();
+    ~nodachi2D();
 
-        objects::GameObjectManager* globalGameObjectManager_;
+    ContactListener* contactListener_;
+    InputHandler* inputHandlerThread_;
+    NetworkHandler* networkHandlerThread_;
+    sf::Mutex* GlobalMutex_;
 
-        b2World* simulatedWorld_;
+    objects::GameObjectManager* globalGameObjectManager_;
 
-        sf::RenderWindow* appWindow_;
-        sf::FloatRect ViewRect_;
-        sf::View twoDCam_;
-        sf::Mutex* GlobalMutex_;
-        sf::Vector2f resolution_;
-        int32 resolutionColor_;
-        sf::Clock Clock_;
-        ContactListener* contactListener_;
-    protected:
+    b2World* simulatedWorld_;
 
-    private:
-        void loadLevel();
-        void handleSystemEvents();
-        void closeWindow();
-        void handleInputEvents( objects::SpacialObject* tmpObject );
+    sf::RenderWindow* appWindow_;
+    sf::FloatRect ViewRect_;
+    sf::View twoDCam_;
+    sf::Vector2f resolution_;
+    int32 resolutionColor_;
 
-        void initializePhysics();
-        void intitializeRenderContext();
-        void initializeThreads();
-        void calculateNextScene();
-        void displayNextScene();
+    sf::Clock Clock_;
+
+private:
+    void handleSystemEvents();
+    void handleInputEvents( objects::SpacialObject* tmpObject );
+    void calculateNextScene();
+    void displayNextScene();
+
+    void closeWindow();
+
+    sf::IPAddress* askForHost();
+    unsigned int askForPort();
+    void loadLevel();
+    void startNetwork();
+    void initializePhysics();
+    void intitializeRenderContext();
+    void initializeThreads();
 };
 
 #endif

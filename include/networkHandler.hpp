@@ -29,21 +29,28 @@ struct networkFlags{
     bool LoggedIn;
 };
 
+//we transmit position, rotation, animationID and maybe scale
+
 class NetworkHandler :public sf::Thread
 {
     private:
         virtual void Run();
         bool sendMessage();
+        void askForUsername();
+        void askForPassword();
+
         sf::SocketTCP client_;
-        sf::IPAddress serverIP_;
+        sf::IPAddress* serverIP_;
         unsigned int serverPort_;
-        std::string userName_;
+        std::string username_;
+        std::string password_;
+
     public:
         sf::Mutex* GlobalMutex_;
         networkFlags globalflags_;
         void connect();
         bool login();
-        NetworkHandler(sf::IPAddress remoteHost, unsigned int Port, sf::Mutex* GlobalMutex);
+        NetworkHandler(sf::IPAddress* remoteHost, unsigned int Port, sf::Mutex* GlobalMutex);
         ~NetworkHandler();
 };
 #endif

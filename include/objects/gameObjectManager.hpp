@@ -28,33 +28,22 @@
 
 namespace objects
 {
-    typedef std::vector< std::string > FileEntry;
-    typedef std::vector< FileEntry > FileData;
-
     class GameObjectManager
     {
     	public:
-            FileData* parseFileData( std::string* fileName, int fields );
-
-            void loadMaterials( std::string materialFile );
             void loadVisualAppearances( std::string visualAppearanceFile );
-            void loadObjects( std::string spacialObjectsFile );
+            void addObject( Object* newObject );
 
             VisualAppearance* provideVisualAppearance( std::string visualAppearanceId );
-            Material* provideMaterial( std::string materialId );
 
             SpacialObject* nextSpacialObject( int current );
 
     		GameObjectManager();
     		~GameObjectManager();
     	private:
-    	FileEntry* parseFileEntry( std::string* entry, std::string* dataDivider );
-    	char* fetchFileData( std::string* fileName, int fields );
-
-    	SpacialObject*                      player_;
-    	std::vector< SpacialObject* >       spacialObjects_;
+//    	SpacialObject*                      player_;
+    	std::vector< Object* >              Objects_;
     	std::vector< VisualAppearance* >    visualAppearancesLibrary_;
-    	std::vector< Material* >            materialLibrary_;
     };
 
 }

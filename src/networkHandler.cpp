@@ -19,11 +19,11 @@
 #include <networkHandler.hpp>
 
 
-NetworkHandler::NetworkHandler( sf::IPAddress remoteHost, unsigned int Port, sf::Mutex* GlobalMutex)
+NetworkHandler::NetworkHandler( sf::IPAddress* remoteHost, unsigned int Port, sf::Mutex* GlobalMutex)
 {
     this->serverIP_ = remoteHost;
     this->serverPort_ = Port;
-    this->userName_ = "";
+    this->username_ = "";
     globalflags_.Running = true;
     globalflags_.Connected = false;
     GlobalMutex_ = GlobalMutex;
@@ -36,7 +36,7 @@ NetworkHandler::~NetworkHandler()
 
 void NetworkHandler::connect()
 {
-    if(client_.Connect(serverPort_, serverIP_) == sf::Socket::Done)
+    if(client_.Connect(serverPort_, *serverIP_) == sf::Socket::Done)
     {
         if(login())
         {
@@ -50,8 +50,28 @@ void NetworkHandler::connect()
     }
     else
     {
-        std::cout << "Can't connect to " << serverIP_.ToString() << " on port " << serverPort_ << ".";
+        std::cerr << "Can't connect to " << serverIP_->ToString() << " on port " << serverPort_ << ".";
     }
+}
+
+bool NetworkHandler::login()
+{
+    askForUsername();
+    askForPassword();
+
+    return false;
+}
+
+void NetworkHandler::askForUsername()
+{
+    std::cout << "Geben sie bitte ihren Benutzernamen ein:" << std::endl;
+    std::cin >> username_;
+}
+
+void NetworkHandler::askForPassword()
+{
+    std::cout << "Geben sie bitte ihr Passwort ein:" << std::endl;
+    std::cin >> password_;
 }
 
 void NetworkHandler::Run()
