@@ -16,36 +16,11 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef ANIMATION_HPP
-#define ANIMATION_HPP
-
-#include <string>
-#include <vector>
+#include <Box2D/Box2D.h>
 #include <SFML/System.hpp>
-#include <SFML/Graphics.hpp>
-namespace objects
+class toolBox
 {
-#define SPRITE_SIZE 32
-
-    class Animation
-    {
-        public:
-            sf::Sprite* getNextFrame();
-            std::string getAnimationId();
-
-            Animation( std::string animationId, std::string fileName, sf::Vector2i rowsAndCollumns, int delayPerFrame );
-
-            Animation();
-            ~Animation();
-        protected:
-
-        private:
-            void iterateToNextFrame();
-            int delayPerFrameInMs_;
-            std::string animationId_;
-            sf::Image* allFrames_;
-            std::vector< sf::Sprite* > frames_;
-            unsigned int currentFrame_;
-    };
-}
-#endif
+    public:
+    static b2Vec2 sfVec_To_b2Vec(sf::Vector2f vector2f);
+    static sf::Vector2f b2Vec_To_sfVec_f(b2Vec2 vector2, int32 ratio, bool flipHorizontaly);
+};

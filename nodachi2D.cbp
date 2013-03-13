@@ -136,6 +136,7 @@
 		<Unit filename="include/objects/material.hpp" />
 		<Unit filename="include/objects/spacialObject.hpp" />
 		<Unit filename="include/objects/visualAppearance.hpp" />
+		<Unit filename="include/toolBox.hpp" />
 		<Unit filename="src/contactListener.cpp" />
 		<Unit filename="src/inputHandler.cpp" />
 		<Unit filename="src/main.cpp" />
@@ -145,6 +146,7 @@
 		<Unit filename="src/objects/material.cpp" />
 		<Unit filename="src/objects/spacialObject.cpp" />
 		<Unit filename="src/objects/visualAppearance.cpp" />
+		<Unit filename="src/toolBox.cpp" />
 		<Extensions>
 			<code_completion>
 				<search_path add="./" />
